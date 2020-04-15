@@ -1,0 +1,10 @@
+gems:
+  - elasticsearch
+  - elasticsearch-api
+  - elasticsearch-dsl
+  - elasticsearch-extensions
+  - elasticsearch-transport
+  - elasticsearch-xpack
+
+min_version:
+  5.0
