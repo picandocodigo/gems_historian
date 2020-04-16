@@ -1,3 +1,4 @@
+# Add here the gems you want to store downlads data for:
 gems:
   - elasticsearch
   - elasticsearch-api
@@ -6,5 +7,12 @@ gems:
   - elasticsearch-transport
   - elasticsearch-xpack
 
-min_version:
-  5.0
+# This variable will be used to ignore really old versions of a gem which you
+# might not want to store data for. Eventually I'll want to set this
+# individually per gem:
+min_version: 5.0
+
+# Select your data storage and the app will attempt to connect using env
+# variables depending on which storage you use.
+# Available storages: postgresql, elasticsearch
+data_storage: postgresql

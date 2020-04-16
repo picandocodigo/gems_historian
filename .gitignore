@@ -1,3 +1,4 @@
 config.yml
 .byebug_history
 Gemfile.lock
+.env
