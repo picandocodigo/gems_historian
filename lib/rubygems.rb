@@ -4,7 +4,6 @@ require 'sequel'
 require 'elasticsearch'
 
 class Rubygems
-
   def initialize
     data_storage
   end
@@ -50,26 +49,22 @@ class Rubygems
     @config ||= YAML.load(File.read('config.yml'))
   end
 
-
   # Check for Postgresql or Elasticsearch information to set up the right data
   # storage engine
   def data_storage
-    if config['data_storage'] == 'postgresql'
-      @db ||= Sequel.connect(ENV['DATABASE_URL'] || 'postgres://localhost/gems')
-    elsif config['data_storage'] == 'elasticsearch'
-      if (url = ENV['ELASTICSEARCH_URL'])
+    if ENV['DATABASE_URL']
+      @db ||= Sequel.connect(ENV['DATABASE_URL'])
+    elsif (url = ENV['ELASTICSEARCH_URL'])
         @es ||= Elasticsearch::Client.new(url: url)
-      elsif ENV['ELASTIC_CLOUD_ID']
+    elsif ENV['ELASTIC_CLOUD_ID']
         @es ||= Elasticsearch::Client.new(
           cloud_id: ENV['ELASTIC_CLOUD_ID'],
           user: ENV['ELASTIC_USERNAME'],
           password: ENV['ELASTIC_PASSWORD']
         )
-      else
+    else
         raise "You need to set up either ELASTICSEARCH_URL or ELASTIC_CLOUD_ID and credentials in your environment to use Elasticsearch."
-      end
     end
-
   end
 
   # Save results
