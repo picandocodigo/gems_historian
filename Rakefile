@@ -4,7 +4,7 @@ require_relative './lib/rubygems.rb'
 desc "Update gem downloads"
 task :update_gems do
   YAML.load(File.read('config.yml'))['gems'].each do |gem|
-    Rubygems.downloads(gem)
+    Rubygems.new.downloads(gem)
   end
 end
 

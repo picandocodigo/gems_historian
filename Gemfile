@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'elasticsearch'
 gem 'pg'
 gem 'rake'
 gem 'sequel'

@@ -1,13 +1,17 @@
 require 'open-uri'
 require 'json'
 require 'sequel'
+require 'elasticsearch'
 
-module Rubygems
-  DB = Sequel.connect(ENV['DATABASE_URL'] || 'postgres://localhost/gems')
+class Rubygems
+
+  def initialize
+    data_storage
+  end
 
   # GET - /api/v1/versions/[GEM NAME].(json|yaml)
   #
-  def self.downloads(name)
+  def downloads(name)
     gem_downloads = JSON.parse(
       URI.parse("https://rubygems.org/api/v1/versions/#{name}.json").read
     ).map do |gem|
@@ -16,28 +20,69 @@ module Rubygems
         version: gem['number'],
         downloads: gem['downloads_count'],
         prerelease: gem['prerelease'],
-        created_at: gem['created_at']
+        published_at: gem['created_at'],
+        created_at: DateTime.now
       }
     end
     save_register(gem_downloads)
   end
 
-  # Save results
-  def self.save_register(gem_downloads)
-    table = DB[:downloads]
-    table.multi_insert(gem_downloads)
+  # Set up when using PostgreSQL, create the table
+  def create_table
+    if @db
+      return if @db.table_exists?(:downloads)
+
+      @db.create_table :downloads do
+        primary_key :id
+        String :name
+        String :version
+        Bignum :downloads
+        FalseClass :prerelease
+        DateTime :published_at
+        DateTime :created_at
+      end
+    end
   end
 
-  def self.create_table
-    return if DB.table_exists?(:downloads)
+  private
 
-    DB.create_table :downloads do
-      primary_key :id
-      String :name
-      String :version
-      Bignum :downloads
-      FalseClass :prerelease
-      DateTime :created_at
+  def config
+    @config ||= YAML.load(File.read('config.yml'))
+  end
+
+
+  # Check for Postgresql or Elasticsearch information to set up the right data
+  # storage engine
+  def data_storage
+    if config['data_storage'] == 'postgresql'
+      @db ||= Sequel.connect(ENV['DATABASE_URL'] || 'postgres://localhost/gems')
+    elsif config['data_storage'] == 'elasticsearch'
+      if (url = ENV['ELASTICSEARCH_URL'])
+        @es ||= Elasticsearch::Client.new(url: url)
+      elsif ENV['ELASTIC_CLOUD_ID']
+        @es ||= Elasticsearch::Client.new(
+          cloud_id: ENV['ELASTIC_CLOUD_ID'],
+          user: ENV['ELASTIC_USERNAME'],
+          password: ENV['ELASTIC_PASSWORD']
+        )
+      else
+        raise "You need to set up either ELASTICSEARCH_URL or ELASTIC_CLOUD_ID and credentials in your environment to use Elasticsearch."
+      end
+    end
+
+  end
+
+  # Save results
+  def save_register(gem_downloads)
+    if @db # Postgresql
+      table = @db[:downloads]
+      table.multi_insert(gem_downloads)
+    elsif @es # Elasticsearch
+      # Bulkify the data:
+      payload = gem_downloads.map do |gem|
+        {index: { _index: 'gems', data: gem } }
+      end
+      @es.bulk(body: payload)
     end
   end
 end
