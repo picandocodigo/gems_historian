@@ -9,4 +9,6 @@ gem 'sinatra'
 
 group :test, :development do
   gem 'byebug'
+  gem 'rspec'
+  gem 'climate_control'
 end
