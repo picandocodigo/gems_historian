@@ -1,14 +1,14 @@
 require 'yaml'
-require_relative './lib/rubygems.rb'
+require_relative './lib/gems_historian.rb'
 
 desc "Update gem downloads"
 task :update_gems do
   YAML.load(File.read('config.yml'))['gems'].each do |gem|
-    Rubygems.new.downloads(gem)
+    GemsHistorian.new.downloads(gem)
   end
 end
 
 desc "Setup the database"
 task :setup do
-  Rubygems.create_table
+  GemsHistorian.create_table
 end

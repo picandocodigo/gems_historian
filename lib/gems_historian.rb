@@ -3,7 +3,7 @@ require 'json'
 require 'sequel'
 require 'elasticsearch'
 
-class Rubygems
+class GemsHistorian
   def initialize
     data_storage
   end

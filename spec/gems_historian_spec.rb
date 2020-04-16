@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'climate_control'
-require_relative '../lib/rubygems.rb'
+require_relative '../lib/gems_historian.rb'
 
-describe Rubygems do
+describe GemsHistorian do
   def with_modified_env(options, &block)
     ClimateControl.modify(options, &block)
   end
