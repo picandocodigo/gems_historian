@@ -10,5 +10,5 @@ end
 
 desc "Setup the database"
 task :setup do
-  GemsHistorian.create_table
+  GemsHistorian.new.create_table
 end
