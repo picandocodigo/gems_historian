@@ -43,4 +43,9 @@ describe GemsHistorian do
       end
     end
   end
+
+  context 'setting gems' do
+    xit 'tries to get the info for given gems' do
+    end
+  end
 end

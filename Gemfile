@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'dotenv'
 gem 'elasticsearch'
 gem 'pg'
 gem 'rake'

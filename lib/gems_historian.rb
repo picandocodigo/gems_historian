@@ -29,25 +29,27 @@ class GemsHistorian
   # Set up when using PostgreSQL, create the table
   def create_table
     if @db
-      return if @db.table_exists?(:downloads)
-
-      @db.create_table :downloads do
-        primary_key :id
-        String :name
-        String :version
-        Bignum :downloads
-        FalseClass :prerelease
-        DateTime :published_at
-        DateTime :created_at
+      begin
+        @db.create_table :downloads do
+          primary_key :id
+          String :name
+          String :version
+          Bignum :downloads
+          FalseClass :prerelease
+          DateTime :published_at
+          DateTime :created_at
+        end
+      rescue StandardError => e
+        if e.cause.is_a? PG::DuplicateTable
+          puts 'Not doing anything, table `gems` already exists'
+        else
+          raise e
+        end
       end
     end
   end
 
   private
-
-  def config
-    @config ||= YAML.load(File.read('config.yml'))
-  end
 
   # Check for Postgresql or Elasticsearch information to set up the right data
   # storage engine
